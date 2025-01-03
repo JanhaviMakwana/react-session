@@ -1,55 +1,32 @@
-import React, { useReducer, useMemo, useCallback } from 'react';
-
-const initialState = {
-  tasks: [],
-};
-
-const reducer = (state, action) => {
-  switch (action.type) {
-    case 'ADD_TASK':
-      return { ...state, tasks: [...state.tasks, action.payload] };
-    case 'TOGGLE_TASK':
-      return {
-        ...state,
-        tasks: state.tasks.map((task) =>
-          task.id === action.payload ? { ...task, completed: !task.completed } : task
-        ),
-      };
-    case 'DELETE_TASK':
-      return { ...state, tasks: state.tasks.filter((task) => task.id !== action.payload) };
-    default:
-      return state;
-  }
-};
+import React, { useMemo, useCallback } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from "../store/index";
+import {addTodo, deleteTodo, toggleComplete} from "../store/reducers/todo";
 
 const ToDoApp = () => {
-  const [state, dispatch] = useReducer(reducer, initialState);
-  const { tasks } = state;
+  const todos = useSelector((state: RootState) => state.todos);
+  const dispatch: AppDispatch = useDispatch();
 
-  const handleAddTask = useCallback((taskName) => {
-    if (taskName.trim() === '') return;
-    dispatch({
-      type: 'ADD_TASK',
-      payload: { id: Date.now(), name: taskName, completed: false },
-    });
+  const handleAddTask = useCallback((text: string) => {
+    dispatch(addTodo(text));
   }, []);
 
-  const handleToggleTask = useCallback((id) => {
-    dispatch({ type: 'TOGGLE_TASK', payload: id });
+  const handleToggleTask = useCallback((id: number) => {
+    dispatch(toggleComplete(id));
   }, []);
 
-  const handleDeleteTask = useCallback((id) => {
-    dispatch({ type: 'DELETE_TASK', payload: id });
+  const handleDeleteTask = useCallback((id: number) => {
+    dispatch(deleteTodo(id));
   }, []);
 
   const pendingTasks = useMemo(
-    () => tasks.filter((task) => !task.completed),
-    [tasks]
+    () => todos.filter((task) => !task.completed),
+    [todos]
   );
 
   const completedTasks = useMemo(
-    () => tasks.filter((task) => task.completed),
-    [tasks]
+    () => todos.filter((task) => task.completed),
+    [todos]
   );
 
   return (
