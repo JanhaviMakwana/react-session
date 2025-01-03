@@ -1,11 +1,17 @@
 import { configureStore } from "@reduxjs/toolkit";
-import todoReducer from "./reducers/todo";
+import { setupListeners } from '@reduxjs/toolkit/query';
+import { userApi } from "./reducers/userApi";
+import userReducer from "./reducers/users";
 
 export const store = configureStore({
-    reducer: {
-      todos: todoReducer,
-    },
+  reducer: {
+    [userApi.reducerPath]: userApi.reducer,
+    users: userReducer,
+  },
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(userApi.middleware)
   });
 
-  export type RootState = ReturnType<typeof store.getState>;
-  export type AppDispatch = typeof store.dispatch;
+setupListeners(store.dispatch);
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
