@@ -16,6 +16,11 @@ export const deleteUser = createAsyncThunk("/user/delete", async (id: string) =>
     return response.data;
 })
 
+export const editUser = createAsyncThunk("/user/editUser", async (user: UserItem) => {
+  const response = await axios.put<UserItem>(`http://localhost:3001/users/${user.id}`, user);
+  return response.data;
+})
+
 interface UserState {
     users: UserItem[];
     loading: boolean;
@@ -52,6 +57,18 @@ const userSlice = createSlice({
             state.loading = false;
             state.users = state.users.filter((user: UserItem) => user.id !== action.payload.id)
         })
+        .addCase(editUser.fulfilled, (state, action: PayloadAction<UserItem>) => {
+          state.loading = false;
+          let updatedUsers = state.users.map((user: UserItem) => {
+            if(user.id === action.payload.id){
+              return ({
+                ...user,
+                name: action.payload.name
+              })
+            }
+          });
+          state.users = updatedUsers as UserItem[];
+      })
     },
   });
 
